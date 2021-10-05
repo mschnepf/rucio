@@ -221,21 +221,22 @@ class Default(protocol.RSEProtocol):
         :raises SourceNotFound: if the source file was not found on the referred storage.
         """
         self.logger(logging.DEBUG, 'downloading file from {} to {}'.format(path, dest))
-
         dest = os.path.abspath(dest)
         if ':' not in dest:
             dest = "file://" + dest
 
-        try:
-            status = self.__gfal2_copy(path, dest, transfer_timeout=transfer_timeout)
-            if status:
-                raise exception.RucioException()
-        except exception.DestinationNotAccessible as error:
-            raise exception.DestinationNotAccessible(str(error))
-        except exception.SourceNotFound as error:
-            raise exception.SourceNotFound(str(error))
-        except Exception as error:
-            raise exception.ServiceUnavailable(error)
+        cmd = 'gfal-copy -vf -p -t %s -T %s %s %s' % (transfer_timeout, transfer_timeout, path, dest)
+        self.logger(logging.DEBUG, 'Command: ' + cmd)
+        cmd = cmd.split()
+
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+
+        if p.returncode:
+            self.logger(logging.DEBUG, 'Error STDOUT: ' + str(stdout))
+            self.logger(logging.DEBUG, 'Error STDERR: ' + str(stderr))
+            raise exception.RucioException(str(stderr)
+
 
     def put(self, source, target, source_dir, transfer_timeout=None):
         """
