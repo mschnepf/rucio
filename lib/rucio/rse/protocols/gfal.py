@@ -235,8 +235,7 @@ class Default(protocol.RSEProtocol):
         if p.returncode:
             self.logger(logging.DEBUG, 'Error STDOUT: ' + str(stdout))
             self.logger(logging.DEBUG, 'Error STDERR: ' + str(stderr))
-            raise exception.RucioException(str(stderr)
-
+            raise exception.RucioException(str(stderr))
 
     def put(self, source, target, source_dir, transfer_timeout=None):
         """
